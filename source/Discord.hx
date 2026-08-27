@@ -13,12 +13,13 @@ using StringTools;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
+	public static var clientID:String = '';
 	public function new()
 	{
 		trace("Discord Client starting...");
 		
 		DiscordRpc.start({
-			clientID: "963344162600656947",
+			clientID: clientID,
 			onReady: onReady,
 			onError: onError,
 			onDisconnected: onDisconnected
@@ -47,7 +48,7 @@ class DiscordClient
 			details: "In the Menus",
 			state: null,
 			largeImageKey: 'icon',
-			largeImageText: "Vyperia Engine - Based on OS Engine / Psych Engine"
+			largeImageText: "Vyperia Engine"
 		});
 	}
 
@@ -63,6 +64,7 @@ class DiscordClient
 
 	public static function initialize()
 	{
+		if(clientID.length == 0) return;
 		var DiscordDaemon = sys.thread.Thread.create(() ->
 		{
 			new DiscordClient();
@@ -73,6 +75,7 @@ class DiscordClient
 
 	public static function changePresence(details:String, state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float)
 	{
+		if(!isInitialized || clientID.length == 0) return;
 		var startTimestamp:Float = if(hasStartTimestamp) Date.now().getTime() else 0;
 
 		if (endTimestamp > 0)

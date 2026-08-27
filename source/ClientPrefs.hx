@@ -36,7 +36,7 @@ class ClientPrefs {
 	public static var imagesPersist:Bool = false;
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
-	public static var iconbops:String = 'OS';
+	public static var iconbops:String = 'Vyperia';
 	public static var colorblindMode:String = 'None';
 	public static var opponentStrums:Bool = false;
 	public static var scoreZoom:Bool = true;
@@ -239,6 +239,7 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.iconbops != null) {
 			iconbops = FlxG.save.data.iconbops;
+			if(iconbops == "OS") iconbops = "Vyperia";
 		}
 		if(FlxG.save.data.autosaveInterval != null) {
 			autosaveInterval = FlxG.save.data.autosaveInterval;

@@ -1311,7 +1311,7 @@ class PlayState extends MusicBeatState
 			songTxt.visible = false;
 		}
 		add(songTxt);
-		songTxt.text = curSong + " (" + storyDifficultyText + ") " + "| OS " + MainMenuState.osEngineVersion;
+		songTxt.text = curSong + " (" + storyDifficultyText + ") " + "| Vyperia " + MainMenuState.vyperiaEngineVersion;
 
 		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -5359,7 +5359,7 @@ class PlayState extends MusicBeatState
 
 		dancingLeft = !dancingLeft;
 
-		if (ClientPrefs.iconbops == "OS") {
+		if (ClientPrefs.iconbops == "Vyperia" || ClientPrefs.iconbops == "OS") {
 			if (dancingLeft){
 				iconP1.angle = 8; iconP2.angle = 8; // maybe i should do it with tweens, but i'm lazy // i'll make it in -1.0.0, i promise
 			} else { 

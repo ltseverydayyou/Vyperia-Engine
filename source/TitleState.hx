@@ -137,12 +137,12 @@ class TitleState extends MusicBeatState
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.checkForUpdates && !closedState) {
 			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/ShadowMario/FNF-PsychEngine/main/gitVersion.txt");
+			var http = new haxe.Http("https://raw.githubusercontent.com/ltseverydayyou/Vyperia-Engine/main/gitVersion.txt");
 
 			http.onData = function (data:String)
 			{
 				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.psychEngineVersion.trim();
+				var curVersion:String = MainMenuState.vyperiaEngineVersion.trim();
 				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
 				if(updateVersion != curVersion) {
 					trace('versions arent matching!');
@@ -645,13 +645,13 @@ class TitleState extends MusicBeatState
 					addMoreText('ltseverydayyou', 45);
 				case 3:
 					deleteCoolText();
-					createCoolText(['Forked', 'from'], 15);
+					createCoolText(['Vyperia Engine'], 15);
 				case 4:
-					addMoreText('OS Engine', 45);
-					addMoreText('Psych Engine', 45);
+					addMoreText('Built for modding', 45);
+					addMoreText('Optimized for gameplay', 45);
 				case 6:
 					deleteCoolText();
-					createCoolText(['Psych Engine by'], 45);
+					createCoolText(['Original engine credits are in Credits'], 25);
 					addMoreText('Shadow Mario',45);
 					addMoreText('RiverOaken',45);
 					addMoreText('bbpanzu',45);

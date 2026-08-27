@@ -145,7 +145,7 @@ class FunkinLua {
 		set('rating', 0);
 		set('ratingName', '');
 		set('ratingFC', '');
-		set('version', MainMenuState.osEngineVersion.trim());
+		set('version', MainMenuState.vyperiaEngineVersion.trim());
 
 		set('inGameOver', false);
 		set('mustHitSection', false);
