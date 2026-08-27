@@ -22,7 +22,9 @@ jobs:
   buildWindows:
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'windows' || inputs.target == 'all'
     runs-on: windows-latest
-    env:`r`n      HXCPP_COMPILE_THREADS: 4`r`n    steps:
+    env:
+      HXCPP_COMPILE_THREADS: 4
+    steps:
       - uses: actions/checkout@v4
       - uses: krdlab/setup-haxe@master
         with:
