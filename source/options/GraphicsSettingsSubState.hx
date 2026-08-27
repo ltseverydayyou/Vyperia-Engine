@@ -53,6 +53,19 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeAntiAliasing; //Changing onChange is only needed if you want to make a special interaction after it changes the value
 		addOption(option);
 
+		var option:Option = new Option('Adaptive Note Rendering',
+			'Limits far-ahead rendered notes on extremely dense charts while always allowing time-critical notes to spawn.',
+			'adaptiveNoteRendering', 'bool', true);
+		addOption(option);
+
+		var option:Option = new Option('Rendered Note Soft Limit',
+			'Soft cap used by Adaptive Note Rendering. Notes within 500ms always bypass this limit.',
+			'maxRenderedNotes', 'int', 700);
+		option.minValue = 200;
+		option.maxValue = 5000;
+		option.changeValue = 100;
+		addOption(option);
+
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",

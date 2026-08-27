@@ -42,8 +42,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Play Mode',
-			'Choose which side you control. Both uses one 4-key set for both strumlines.',
-			'playMode', 'string', 'Player', ['Player', 'Opponent', 'Both']);
+			'Choose which side you control.',
+			'playMode', 'string', 'Player', ['Player', 'Opponent']);
+		addOption(option);
+
+		var option:Option = new Option('Mouse Wheel Menu Navigation',
+			'Use the mouse wheel to move up and down through supported menus.',
+			'mouseWheelMenus', 'bool', true);
 		addOption(option);
 
 		var option:Option = new Option('Miss Sound SFX',

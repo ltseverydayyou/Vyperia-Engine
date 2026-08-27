@@ -1,6 +1,8 @@
 package;
 
 import Sys.sleep;
+import sys.FileSystem;
+import sys.io.File;
 import discord_rpc.DiscordRpc;
 
 #if LUA_ALLOWED
@@ -14,9 +16,15 @@ class DiscordClient
 {
 	public static var isInitialized:Bool = false;
 	public static var clientID:String = '';
+	static var clientIDLoaded:Bool = false;
 	public function new()
 	{
 		trace("Discord Client starting...");
+		loadClientID();
+		if(clientID.length == 0) {
+			trace("Discord RPC disabled: put the Vyperia Discord application ID in vyperia-rpc.txt");
+			return;
+		}
 		
 		DiscordRpc.start({
 			clientID: clientID,
@@ -62,9 +70,20 @@ class DiscordClient
 		trace('Disconnected! $_code : $_message');
 	}
 
+	public static function loadClientID():Void
+	{
+		if(clientIDLoaded) return;
+		clientIDLoaded = true;
+		if(FileSystem.exists('vyperia-rpc.txt')) clientID = File.getContent('vyperia-rpc.txt').trim();
+	}
+
 	public static function initialize()
 	{
-		if(clientID.length == 0) return;
+		loadClientID();
+		if(clientID.length == 0) {
+			trace("Discord RPC not started: no Vyperia application ID configured.");
+			return;
+		}
 		var DiscordDaemon = sys.thread.Thread.create(() ->
 		{
 			new DiscordClient();

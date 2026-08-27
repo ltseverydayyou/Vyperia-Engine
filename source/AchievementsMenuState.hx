@@ -78,10 +78,11 @@ class AchievementsMenuState extends MusicBeatState
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (controls.UI_UP_P) {
+		var wheel:Int = MenuInput.wheelChange();
+		if (controls.UI_UP_P || wheel < 0) {
 			changeSelection(-1);
 		}
-		if (controls.UI_DOWN_P) {
+		if (controls.UI_DOWN_P || wheel > 0) {
 			changeSelection(1);
 		}
 

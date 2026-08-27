@@ -155,8 +155,9 @@ class PauseSubState extends MusicBeatSubstate
 		super.update(elapsed);
 		updateSkipTextStuff();
 
-		var upP = controls.UI_UP_P;
-		var downP = controls.UI_DOWN_P;
+		var wheel:Int = MenuInput.wheelChange();
+		var upP = controls.UI_UP_P || wheel < 0;
+		var downP = controls.UI_DOWN_P || wheel > 0;
 		var accepted = controls.ACCEPT;
 
 		if (upP)
@@ -234,11 +235,7 @@ class PauseSubState extends MusicBeatSubstate
 				case "Restart Song":
 					restartSong();
 				case 'Switch Play Mode':
-					ClientPrefs.playMode = switch(ClientPrefs.playMode) {
-						case 'Player': 'Opponent';
-						case 'Opponent': 'Both';
-						default: 'Player';
-					};
+					ClientPrefs.playMode = (ClientPrefs.playMode == 'Opponent') ? 'Player' : 'Opponent';
 					ClientPrefs.saveSettings();
 					PlayState.changedDifficulty = true;
 					restartSong();

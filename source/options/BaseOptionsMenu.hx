@@ -135,11 +135,12 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (controls.UI_UP_P)
+		var wheel:Int = MenuInput.wheelChange();
+		if (controls.UI_UP_P || wheel < 0)
 		{
 			changeSelection(-1);
 		}
-		if (controls.UI_DOWN_P)
+		if (controls.UI_DOWN_P || wheel > 0)
 		{
 			changeSelection(1);
 		}

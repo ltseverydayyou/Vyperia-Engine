@@ -23,6 +23,20 @@ class ClientPrefs {
 	public static var playMode:String = 'Player';
 	public static var hudScale:Float = 1;
 	public static var hudAlpha:Float = 1;
+	public static var showGameplayStats:Bool = false;
+	public static var arrowHitGlow:Bool = true;
+	public static var mouseWheelMenus:Bool = true;
+	public static var adaptiveNoteRendering:Bool = true;
+	public static var maxRenderedNotes:Int = 700;
+	public static var judgementPerfect:String = 'Perfect';
+	public static var judgementSick:String = 'Sick';
+	public static var judgementGood:String = 'Good';
+	public static var judgementBad:String = 'Bad';
+	public static var judgementShit:String = 'Shit';
+	public static var scoreLabel:String = 'Score';
+	public static var comboBreaksLabel:String = 'Combo Breaks';
+	public static var averageLabel:String = 'Average';
+	public static var accuracyLabel:String = 'Accuracy';
 	public static var lowQuality:Bool = false;
 	public static var framerate:Int = 60;
 	public static var cursing:Bool = true;
@@ -129,6 +143,20 @@ class ClientPrefs {
 		FlxG.save.data.playMode = playMode;
 		FlxG.save.data.hudScale = hudScale;
 		FlxG.save.data.hudAlpha = hudAlpha;
+		FlxG.save.data.showGameplayStats = showGameplayStats;
+		FlxG.save.data.arrowHitGlow = arrowHitGlow;
+		FlxG.save.data.mouseWheelMenus = mouseWheelMenus;
+		FlxG.save.data.adaptiveNoteRendering = adaptiveNoteRendering;
+		FlxG.save.data.maxRenderedNotes = maxRenderedNotes;
+		FlxG.save.data.judgementPerfect = judgementPerfect;
+		FlxG.save.data.judgementSick = judgementSick;
+		FlxG.save.data.judgementGood = judgementGood;
+		FlxG.save.data.judgementBad = judgementBad;
+		FlxG.save.data.judgementShit = judgementShit;
+		FlxG.save.data.scoreLabel = scoreLabel;
+		FlxG.save.data.comboBreaksLabel = comboBreaksLabel;
+		FlxG.save.data.averageLabel = averageLabel;
+		FlxG.save.data.accuracyLabel = accuracyLabel;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
 		//FlxG.save.data.cursing = cursing;
@@ -219,8 +247,23 @@ class ClientPrefs {
 		if(FlxG.save.data.comboPopups != null) comboPopups = FlxG.save.data.comboPopups;
 		if(FlxG.save.data.missSounds != null) missSounds = FlxG.save.data.missSounds;
 		if(FlxG.save.data.playMode != null) playMode = FlxG.save.data.playMode;
+		if(playMode != 'Opponent') playMode = 'Player';
 		if(FlxG.save.data.hudScale != null) hudScale = FlxG.save.data.hudScale;
 		if(FlxG.save.data.hudAlpha != null) hudAlpha = FlxG.save.data.hudAlpha;
+		if(FlxG.save.data.showGameplayStats != null) showGameplayStats = FlxG.save.data.showGameplayStats;
+		if(FlxG.save.data.arrowHitGlow != null) arrowHitGlow = FlxG.save.data.arrowHitGlow;
+		if(FlxG.save.data.mouseWheelMenus != null) mouseWheelMenus = FlxG.save.data.mouseWheelMenus;
+		if(FlxG.save.data.adaptiveNoteRendering != null) adaptiveNoteRendering = FlxG.save.data.adaptiveNoteRendering;
+		if(FlxG.save.data.maxRenderedNotes != null) maxRenderedNotes = FlxG.save.data.maxRenderedNotes;
+		if(FlxG.save.data.judgementPerfect != null) judgementPerfect = FlxG.save.data.judgementPerfect;
+		if(FlxG.save.data.judgementSick != null) judgementSick = FlxG.save.data.judgementSick;
+		if(FlxG.save.data.judgementGood != null) judgementGood = FlxG.save.data.judgementGood;
+		if(FlxG.save.data.judgementBad != null) judgementBad = FlxG.save.data.judgementBad;
+		if(FlxG.save.data.judgementShit != null) judgementShit = FlxG.save.data.judgementShit;
+		if(FlxG.save.data.scoreLabel != null) scoreLabel = FlxG.save.data.scoreLabel;
+		if(FlxG.save.data.comboBreaksLabel != null) comboBreaksLabel = FlxG.save.data.comboBreaksLabel;
+		if(FlxG.save.data.averageLabel != null) averageLabel = FlxG.save.data.averageLabel;
+		if(FlxG.save.data.accuracyLabel != null) accuracyLabel = FlxG.save.data.accuracyLabel;
 		if(FlxG.save.data.lowQuality != null) {
 			lowQuality = FlxG.save.data.lowQuality;
 		}
@@ -376,6 +419,29 @@ class ClientPrefs {
 			}
 			reloadControls();
 		}
+	}
+
+	public static function getJudgementText(name:String):String {
+		return switch(name.toLowerCase()) {
+			case 'perfect': judgementPerfect;
+			case 'sick': judgementSick;
+			case 'good': judgementGood;
+			case 'bad': judgementBad;
+			case 'shit': judgementShit;
+			default: name;
+		};
+	}
+
+	public static function isCustomJudgementText(name:String):Bool {
+		var expected = switch(name.toLowerCase()) {
+			case 'perfect': 'Perfect';
+			case 'sick': 'Sick';
+			case 'good': 'Good';
+			case 'bad': 'Bad';
+			case 'shit': 'Shit';
+			default: name;
+		};
+		return getJudgementText(name) != expected;
 	}
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic {

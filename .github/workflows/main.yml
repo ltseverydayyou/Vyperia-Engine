@@ -87,7 +87,7 @@ jobs:
           path: export/release/windows/bin
 
   buildLinux:
-    if: github.event_name != 'workflow_dispatch' || inputs.target == 'linux' || inputs.target == 'all'
+    if: github.event_name == 'workflow_dispatch' && (inputs.target == 'linux' || inputs.target == 'all')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
           path: export/release/linux/bin
 
   buildMac:
-    if: github.event_name != 'workflow_dispatch' || inputs.target == 'mac' || inputs.target == 'all'
+    if: github.event_name == 'workflow_dispatch' && (inputs.target == 'mac' || inputs.target == 'all')
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

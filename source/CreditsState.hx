@@ -194,8 +194,9 @@ class CreditsState extends MusicBeatState
 				var shiftMult:Int = 1;
 				if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-				var upP = controls.UI_UP_P;
-				var downP = controls.UI_DOWN_P;
+				var wheel:Int = MenuInput.wheelChange();
+				var upP = controls.UI_UP_P || wheel < 0;
+				var downP = controls.UI_DOWN_P || wheel > 0;
 
 				if (upP)
 				{

@@ -47,6 +47,16 @@ class VisualsUISubState extends BaseOptionsMenu
 			'ratingPopups', 'bool', true);
 		addOption(option);
 
+		var option:Option = new Option('Gameplay Stats',
+			'Show P1/Opponent note counts, total notes hit, KPS and rendered notes.',
+			'showGameplayStats', 'bool', false);
+		addOption(option);
+
+		var option:Option = new Option('Arrow Hit Glow',
+			'Play the receptor confirm/glow animation when a note is hit.',
+			'arrowHitGlow', 'bool', true);
+		addOption(option);
+
 		var option:Option = new Option('Combo Popups',
 			'Show combo label and combo number sprites after note hits.',
 			'comboPopups', 'bool', true);
