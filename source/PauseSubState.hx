@@ -20,7 +20,7 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Gameplay Changers', 'Options', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Switch Play Mode', 'Change Difficulty', 'Gameplay Changers', 'Options', 'Exit to menu'];
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
 
@@ -98,6 +98,14 @@ class PauseSubState extends MusicBeatSubstate
 		blueballedTxt.setFormat(Paths.font('vcr.ttf'), 32);
 		blueballedTxt.updateHitbox();
 		add(blueballedTxt);
+
+		var playModeText:FlxText = new FlxText(20, 15 + 101, 0, 'PLAY MODE: ' + ClientPrefs.playMode.toUpperCase(), 24);
+		playModeText.scrollFactor.set();
+		playModeText.setFormat(Paths.font('vcr.ttf'), 24);
+		playModeText.x = 20;
+		playModeText.y = FlxG.height - (playModeText.height + 20);
+		playModeText.updateHitbox();
+		add(playModeText);
 
 		practiceText = new FlxText(20, 15 + 101, 0, "PRACTICE MODE", 32);
 		practiceText.scrollFactor.set();
@@ -224,6 +232,15 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = true;
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
+					restartSong();
+				case 'Switch Play Mode':
+					ClientPrefs.playMode = switch(ClientPrefs.playMode) {
+						case 'Player': 'Opponent';
+						case 'Opponent': 'Both';
+						default: 'Player';
+					};
+					ClientPrefs.saveSettings();
+					PlayState.changedDifficulty = true;
 					restartSong();
 				case "Leave Charting Mode":
 					restartSong();

@@ -17,6 +17,12 @@ class ClientPrefs {
 	public static var autotitleskip:Bool = false;
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
+	public static var ratingPopups:Bool = true;
+	public static var comboPopups:Bool = true;
+	public static var missSounds:Bool = true;
+	public static var playMode:String = 'Player';
+	public static var hudScale:Float = 1;
+	public static var hudAlpha:Float = 1;
 	public static var lowQuality:Bool = false;
 	public static var framerate:Int = 60;
 	public static var cursing:Bool = true;
@@ -117,6 +123,12 @@ class ClientPrefs {
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
+		FlxG.save.data.ratingPopups = ratingPopups;
+		FlxG.save.data.comboPopups = comboPopups;
+		FlxG.save.data.missSounds = missSounds;
+		FlxG.save.data.playMode = playMode;
+		FlxG.save.data.hudScale = hudScale;
+		FlxG.save.data.hudAlpha = hudAlpha;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
 		//FlxG.save.data.cursing = cursing;
@@ -203,6 +215,12 @@ class ClientPrefs {
 		if(FlxG.save.data.noteSplashes != null) {
 			noteSplashes = FlxG.save.data.noteSplashes;
 		}
+		if(FlxG.save.data.ratingPopups != null) ratingPopups = FlxG.save.data.ratingPopups;
+		if(FlxG.save.data.comboPopups != null) comboPopups = FlxG.save.data.comboPopups;
+		if(FlxG.save.data.missSounds != null) missSounds = FlxG.save.data.missSounds;
+		if(FlxG.save.data.playMode != null) playMode = FlxG.save.data.playMode;
+		if(FlxG.save.data.hudScale != null) hudScale = FlxG.save.data.hudScale;
+		if(FlxG.save.data.hudAlpha != null) hudAlpha = FlxG.save.data.hudAlpha;
 		if(FlxG.save.data.lowQuality != null) {
 			lowQuality = FlxG.save.data.lowQuality;
 		}

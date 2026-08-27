@@ -42,6 +42,28 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('Judgement Popups',
+			'Show Perfect/Sick/Good/Bad judgement sprites after note hits.',
+			'ratingPopups', 'bool', true);
+		addOption(option);
+
+		var option:Option = new Option('Combo Popups',
+			'Show combo label and combo number sprites after note hits.',
+			'comboPopups', 'bool', true);
+		addOption(option);
+
+		var option:Option = new Option('HUD Scale',
+			'Scales the gameplay HUD for built-in UI customization.',
+			'hudScale', 'percent', 1);
+		option.minValue = 0.5; option.maxValue = 1.5; option.changeValue = 0.05; option.decimals = 2;
+		addOption(option);
+
+		var option:Option = new Option('HUD Opacity',
+			'Changes the opacity of the gameplay HUD.',
+			'hudAlpha', 'percent', 1);
+		option.minValue = 0.1; option.maxValue = 1; option.changeValue = 0.05; option.decimals = 2;
+		addOption(option);
+
 		var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',

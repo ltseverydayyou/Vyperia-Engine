@@ -781,7 +781,7 @@ class ChartingState extends MusicBeatState
 			for (i in 0..._song.notes[curSec].sectionNotes.length)
 			{
 				var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
-				notesCopied.push(note);
+				notesCopied.push(note.copy());
 			}
 
 			var startThing:Float = sectionStartTime();
@@ -809,7 +809,7 @@ class ChartingState extends MusicBeatState
 				return;
 			}
 
-			var addToTime:Float = Conductor.stepCrochet * (getSectionBeats() * 4 * (curSec - sectionToCopy));
+			var addToTime:Float = sectionStartTime() - sectionStartTime(sectionToCopy - curSec);
 			//trace('Time to add: ' + addToTime);
 
 			for (note in notesCopied)
@@ -894,15 +894,16 @@ class ChartingState extends MusicBeatState
 			var value:Int = Std.int(stepperCopy.value);
 			if(value == 0) return;
 
-			var daSec = FlxMath.maxInt(curSec, value);
+			var sourceSec:Int = curSec - value;
+			if(sourceSec < 0 || sourceSec >= _song.notes.length || curSec < 0 || curSec >= _song.notes.length) return;
+			var sectionOffset:Float = sectionStartTime() - sectionStartTime(-value);
 
-			for (note in _song.notes[daSec - value].sectionNotes)
+			for (note in _song.notes[sourceSec].sectionNotes)
 			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
-
-
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[daSec].sectionNotes.push(copiedNote);
+				var strum:Float = note[0] + sectionOffset;
+				var copiedNote:Array<Dynamic> = note.copy();
+				copiedNote[0] = strum;
+				_song.notes[curSec].sectionNotes.push(copiedNote);
 			}
 
 			var startThing:Float = sectionStartTime(-value);

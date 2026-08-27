@@ -41,6 +41,16 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Play Mode',
+			'Choose which side you control. Both uses one 4-key set for both strumlines.',
+			'playMode', 'string', 'Player', ['Player', 'Opponent', 'Both']);
+		addOption(option);
+
+		var option:Option = new Option('Miss Sound SFX',
+			'Play the missnote sound effect when you press with no hittable note.',
+			'missSounds', 'bool', true);
+		addOption(option);
+
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', //Name
 			'If checked, notes go Down instead of Up, simple enough.', //Description

@@ -640,15 +640,14 @@ class TitleState extends MusicBeatState
 					//FlxG.sound.music.stop();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
-					createCoolText(['OS Engine by'], 45);
+					createCoolText(['Vyperia Engine by'], 45);
 				case 2:
-					addMoreText('weuz_', 45);
-					addMoreText('nelifs', 45);
-					addMoreText('Cooljer', 45);
+					addMoreText('ltseverydayyou', 45);
 				case 3:
 					deleteCoolText();
 					createCoolText(['Forked', 'from'], 15);
 				case 4:
+					addMoreText('OS Engine', 45);
 					addMoreText('Psych Engine', 45);
 				case 6:
 					deleteCoolText();

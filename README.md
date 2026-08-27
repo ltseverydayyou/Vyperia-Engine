@@ -1,3 +1,24 @@
+# Friday Night Funkin' - Vyperia Engine
+
+Vyperia Engine is a performance-focused fork of **OS Engine**, which itself is based on **Psych Engine**. The original OS Engine and Psych Engine credits are preserved below.
+
+## Vyperia Engine
+
+- Maintained by [ltseverydayyou](https://github.com/ltseverydayyou)
+- Focused on dense-chart performance, memory cleanup, gameplay-side control, HUD customization, and chart-editor reliability.
+- Repository: [ltseverydayyou/Vyperia-Engine](https://github.com/ltseverydayyou/Vyperia-Engine)
+
+### Vyperia additions
+
+- Fixed judgement/combo popup objects accumulating in the gameplay state after note hits.
+- Player, Opponent, and Both play modes.
+- Pause-menu play-mode switching.
+- Judgement popup, combo popup, note splash, and miss-SFX controls.
+- HUD scale and opacity controls.
+- Safer chart section copy/paste behavior across BPM and section-length changes.
+
+---
+
 ![](https://media.discordapp.net/attachments/969211146412363828/980124443164672000/23336ff517a80f27.png?width=1101&height=701)
 # Friday Night Funkin' - OS Engine - Modded Psych Engine 
 ![](https://img.shields.io/github/issues/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/forks/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/stars/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/license/notweuz/FNF-OSEngine) ![GitHub all releases](https://img.shields.io/github/downloads/notweuz/FNF-OSEngine/total) ![GitHub repo size](https://img.shields.io/github/repo-size/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/contributors/notweuz/FNF-OSEngine) ![GitHub release (latest by date)](https://img.shields.io/github/downloads/notweuz/FNF-OSEngine/latest/total)

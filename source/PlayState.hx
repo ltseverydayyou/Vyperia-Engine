@@ -210,6 +210,7 @@ class PlayState extends MusicBeatState
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled:Bool = false;
 	public var practiceMode:Bool = false;
+	public var vyperiaPlayMode:String = 'Player';
 
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
@@ -408,6 +409,7 @@ class PlayState extends MusicBeatState
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
+		vyperiaPlayMode = ClientPrefs.playMode;
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
@@ -1317,6 +1319,8 @@ class PlayState extends MusicBeatState
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = cpuControlled;
 		add(botplayTxt);
+		camHUD.zoom = ClientPrefs.hudScale;
+		camHUD.alpha = ClientPrefs.hudAlpha;
 		if(ClientPrefs.downScroll) {
 			botplayTxt.y = timeBarBG.y - 78;
 		}
@@ -2652,6 +2656,9 @@ class PlayState extends MusicBeatState
 				{
 					gottaHitNote = !section.mustHitSection;
 				}
+				var originalGottaHitNote:Bool = gottaHitNote;
+				if(vyperiaPlayMode == 'Opponent') gottaHitNote = !gottaHitNote;
+				else if(vyperiaPlayMode == 'Both') gottaHitNote = true;
 
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
@@ -2672,6 +2679,7 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, null, null, ishouldsetthisskin);
 				swagNote.mustPress = gottaHitNote;
+				swagNote.vyperiaOriginalMustPress = originalGottaHitNote;
 				swagNote.sustainLength = songNotes[2];
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.noteType = songNotes[3];
@@ -2702,6 +2710,7 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(songSpeed, 2)), daNoteData, oldNote, true, null, susskin);
 						sustainNote.mustPress = gottaHitNote;
+						sustainNote.vyperiaOriginalMustPress = originalGottaHitNote;
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.scrollFactor.set();
@@ -2710,7 +2719,7 @@ class PlayState extends MusicBeatState
 						sustainNote.alpha = ClientPrefs.holdNoteVisibility;
 						unspawnNotes.push(sustainNote);
 
-						if (sustainNote.mustPress)
+						if (vyperiaPlayMode == 'Both' ? sustainNote.vyperiaOriginalMustPress : sustainNote.mustPress)
 						{
 							sustainNote.x += FlxG.width / 2; // general offset
 						}
@@ -2725,7 +2734,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				if (swagNote.mustPress)
+				if (vyperiaPlayMode == 'Both' ? swagNote.vyperiaOriginalMustPress : swagNote.mustPress)
 				{
 					swagNote.x += FlxG.width / 2; // general offset
 				}
@@ -3338,7 +3347,7 @@ class PlayState extends MusicBeatState
 		if (camZooming)
 		{
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1));
-			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1));
+			camHUD.zoom = FlxMath.lerp(ClientPrefs.hudScale, camHUD.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1));
 		}
 
 		FlxG.watch.addQuick("secShit", curSection);
@@ -3386,7 +3395,7 @@ class PlayState extends MusicBeatState
 			notes.forEachAlive(function(daNote:Note)
 			{
 				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
-				if(!daNote.mustPress) strumGroup = opponentStrums;
+				if(vyperiaPlayMode == 'Both' ? !daNote.vyperiaOriginalMustPress : !daNote.mustPress) strumGroup = opponentStrums;
 
 				var strumX:Float = strumGroup.members[daNote.noteData].x;
 				var strumY:Float = strumGroup.members[daNote.noteData].y;
@@ -3525,6 +3534,7 @@ class PlayState extends MusicBeatState
 		setOnLuas('cameraX', camFollowPos.x);
 		setOnLuas('cameraY', camFollowPos.y);
 		setOnLuas('botPlay', cpuControlled);
+		setOnLuas('vyperiaPlayMode', vyperiaPlayMode);
 		for (shader in animatedShaders)
 			{
 				shader.update(elapsed);
@@ -4354,14 +4364,6 @@ class PlayState extends MusicBeatState
 		// boyfriend.playAnim('hey');
 		vocals.volume = 1;
 
-		var placement:String = Std.string(combo);
-
-		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
-		coolText.screenCenter();
-		coolText.x = FlxG.width * 0.35;
-		//
-
-		var rating:FlxSprite = new FlxSprite();
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
@@ -4388,6 +4390,15 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		// Vyperia: dense charts can completely bypass popup sprite/tween allocation.
+		if(!ClientPrefs.ratingPopups && !ClientPrefs.comboPopups) return;
+
+		var placement:String = Std.string(combo);
+		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
+		coolText.screenCenter();
+		coolText.x = FlxG.width * 0.35;
+		var rating:FlxSprite = new FlxSprite();
+
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
 
@@ -4405,7 +4416,7 @@ class PlayState extends MusicBeatState
 		rating.acceleration.y = 550;
 		rating.velocity.y -= FlxG.random.int(140, 175);
 		rating.velocity.x -= FlxG.random.int(0, 10);
-		rating.visible = (!ClientPrefs.hideHud && showRating);
+		rating.visible = (!ClientPrefs.hideHud && showRating && ClientPrefs.ratingPopups);
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
@@ -4415,13 +4426,13 @@ class PlayState extends MusicBeatState
 		comboSpr.x = coolText.x;
 		comboSpr.acceleration.y = FlxG.random.int(200, 300);
 		comboSpr.velocity.y -= FlxG.random.int(140, 160);
-		comboSpr.visible = (!ClientPrefs.hideHud && showCombo);
+		comboSpr.visible = (!ClientPrefs.hideHud && showCombo && ClientPrefs.comboPopups);
 		comboSpr.x += ClientPrefs.comboOffset[0];
 		comboSpr.y -= ClientPrefs.comboOffset[1];
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
 
-		insert(members.indexOf(strumLineNotes), rating);
+		if(ClientPrefs.ratingPopups) insert(members.indexOf(strumLineNotes), rating);
 
 		if (!PlayState.isPixelStage)
 		{
@@ -4450,7 +4461,7 @@ class PlayState extends MusicBeatState
 
 		var daLoop:Int = 0;
 		var xThing:Float = 0;
-		if (showCombo)
+		if (showCombo && ClientPrefs.comboPopups)
 		{
 			insert(members.indexOf(strumLineNotes), comboSpr);
 		}
@@ -4482,12 +4493,13 @@ class PlayState extends MusicBeatState
 			numScore.visible = !ClientPrefs.hideHud;
 
 			//if (combo >= 10 || combo == 0)
-			if(showComboNum)
+			if(showComboNum && ClientPrefs.comboPopups)
 				insert(members.indexOf(strumLineNotes), numScore);
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 				onComplete: function(tween:FlxTween)
 				{
+					remove(numScore, true);
 					numScore.destroy();
 				},
 				startDelay: Conductor.crochet * 0.002
@@ -4513,8 +4525,10 @@ class PlayState extends MusicBeatState
 			onComplete: function(tween:FlxTween)
 			{
 				coolText.destroy();
+				remove(comboSpr, true);
 				comboSpr.destroy();
 
+				remove(rating, true);
 				rating.destroy();
 			},
 			startDelay: Conductor.crochet * 0.002
@@ -4566,9 +4580,11 @@ class PlayState extends MusicBeatState
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								doubleNote.kill();
-								notes.remove(doubleNote, true);
-								doubleNote.destroy();
+								if(!(vyperiaPlayMode == 'Both' && doubleNote.vyperiaOriginalMustPress != epicNote.vyperiaOriginalMustPress)) {
+									doubleNote.kill();
+									notes.remove(doubleNote, true);
+									doubleNote.destroy();
+								}
 							} else
 								notesStopped = true;
 						}
@@ -4600,6 +4616,10 @@ class PlayState extends MusicBeatState
 			}
 
 			var spr:StrumNote = playerStrums.members[key];
+			if(vyperiaPlayMode == 'Both') {
+				var oppSpr:StrumNote = opponentStrums.members[key];
+				if(oppSpr != null && oppSpr.animation.curAnim.name != 'confirm') { oppSpr.playAnim('pressed'); oppSpr.resetAnim = 0; }
+			}
 			if(spr != null && spr.animation.curAnim.name != 'confirm')
 			{
 				spr.playAnim('pressed');
@@ -4628,6 +4648,10 @@ class PlayState extends MusicBeatState
 		if(!cpuControlled && startedCountdown && !paused && key > -1)
 		{
 			var spr:StrumNote = playerStrums.members[key];
+			if(vyperiaPlayMode == 'Both') {
+				var oppSpr:StrumNote = opponentStrums.members[key];
+				if(oppSpr != null) { oppSpr.playAnim('static'); oppSpr.resetAnim = 0; }
+			}
 			if(spr != null)
 			{
 				spr.playAnim('static');
@@ -4746,7 +4770,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		notes.forEachAlive(function(note:Note) {
-			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
+			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1 && !(vyperiaPlayMode == 'Both' && daNote.vyperiaOriginalMustPress != note.vyperiaOriginalMustPress)) {
 				note.kill();
 				notes.remove(note, true);
 				note.destroy();
@@ -4771,6 +4795,7 @@ class PlayState extends MusicBeatState
 		RecalculateRating(true);
 
 		var char:Character = boyfriend;
+		if(vyperiaPlayMode == 'Opponent' && !daNote.vyperiaOriginalMustPress) char = dad;
 		if(daNote.gfNote) {
 			char = gf;
 		}
@@ -4788,7 +4813,8 @@ class PlayState extends MusicBeatState
 	{
 		if(ClientPrefs.ghostTapping) return; //fuck it
 
-		if (!boyfriend.stunned)
+		var missPressChar:Character = (vyperiaPlayMode == 'Opponent') ? dad : boyfriend;
+		if (missPressChar != null && !missPressChar.stunned)
 		{
 			health -= 0.05 * healthLoss;
 			if(instakillOnMiss)
@@ -4810,7 +4836,7 @@ class PlayState extends MusicBeatState
 			totalPlayed++;
 			RecalculateRating(true);
 
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+			if(ClientPrefs.missSounds) FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 			// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
 			// FlxG.log.add('played imss note');
 
@@ -4822,8 +4848,8 @@ class PlayState extends MusicBeatState
 				boyfriend.stunned = false;
 			});*/
 
-			if(boyfriend.hasMissAnimations) {
-				boyfriend.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
+			if(missPressChar.hasMissAnimations) {
+				missPressChar.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
 			}
 			vocals.volume = 0;
 		}
@@ -4835,10 +4861,11 @@ class PlayState extends MusicBeatState
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
-		if(note.noteType == 'Hey!' && dad.animOffsets.exists('hey')) {
-			dad.playAnim('hey', true);
-			dad.specialAnim = true;
-			dad.heyTimer = 0.6;
+		var autoChar:Character = (vyperiaPlayMode == 'Opponent' && note.vyperiaOriginalMustPress) ? boyfriend : dad;
+		if(note.noteType == 'Hey!' && autoChar != null && autoChar.animOffsets.exists('hey')) {
+			autoChar.playAnim('hey', true);
+			autoChar.specialAnim = true;
+			autoChar.heyTimer = 0.6;
 		} else if(!note.noAnimation) {
 			var altAnim:String = note.animSuffix;
 
@@ -4850,6 +4877,7 @@ class PlayState extends MusicBeatState
 			}
 
 			var char:Character = dad;
+			if(vyperiaPlayMode == 'Opponent' && note.vyperiaOriginalMustPress) char = boyfriend;
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
 			if(note.gfNote) {
 				char = gf;
@@ -4977,8 +5005,9 @@ class PlayState extends MusicBeatState
 				}
 				else
 				{
-					boyfriend.playAnim(animToPlay + note.animSuffix, true);
-					boyfriend.holdTimer = 0;
+					var controlledChar:Character = ((vyperiaPlayMode == 'Opponent' || vyperiaPlayMode == 'Both') && !note.vyperiaOriginalMustPress) ? dad : boyfriend;
+					controlledChar.playAnim(animToPlay + note.animSuffix, true);
+					controlledChar.holdTimer = 0;
 
 					if(SONG.cameraMoveOnNotes){
 						if(SONG.notes[Math.floor(curStep / 16)].mustHitSection == true && !note.isSustainNote){
@@ -5024,7 +5053,9 @@ class PlayState extends MusicBeatState
 				}
 				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time);
 			} else {
-				var spr = playerStrums.members[note.noteData];
+				var hitStrums:FlxTypedGroup<StrumNote> = playerStrums;
+				if(vyperiaPlayMode == 'Both' && !note.vyperiaOriginalMustPress) hitStrums = opponentStrums;
+				var spr = hitStrums.members[note.noteData];
 				if(spr != null)
 				{
 					spr.playAnim('confirm', true);
@@ -5050,7 +5081,9 @@ class PlayState extends MusicBeatState
 
 	function spawnNoteSplashOnNote(note:Note) {
 		if(ClientPrefs.noteSplashes && note != null) {
-			var strum:StrumNote = playerStrums.members[note.noteData];
+			var splashGroup:FlxTypedGroup<StrumNote> = playerStrums;
+			if(vyperiaPlayMode == 'Both' && !note.vyperiaOriginalMustPress) splashGroup = opponentStrums;
+			var strum:StrumNote = splashGroup.members[note.noteData];
 			if(strum != null) {
 				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
 			}
@@ -5192,7 +5225,7 @@ class PlayState extends MusicBeatState
 
 			if(!camZooming) { //Just a way for preventing it to be permanently zoomed until Skid & Pump hits a note
 				FlxTween.tween(FlxG.camera, {zoom: defaultCamZoom}, 0.5);
-				FlxTween.tween(camHUD, {zoom: 1}, 0.5);
+				FlxTween.tween(camHUD, {zoom: ClientPrefs.hudScale}, 0.5);
 			}
 		}
 
