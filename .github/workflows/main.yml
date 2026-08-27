@@ -24,15 +24,26 @@ jobs:
     runs-on: windows-latest
     env:
       HXCPP_COMPILE_THREADS: 4
+      HXCPP_COMPILE_CACHE: ${{ github.workspace }}\hxcpp-cache
+      HXCPP_CACHE_MB: 4096
     steps:
       - uses: actions/checkout@v4
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.2.5
-      - name: Install Haxelib
+      - name: Restore Haxelib cache
+        id: haxelib-cache
+        uses: actions/cache@v4
+        with:
+          path: C:\haxelib
+          key: vyperia-windows-haxelib-${{ hashFiles('Project.xml') }}
+      - name: Configure Haxelib path
+        shell: cmd
+        run: haxelib setup C:/haxelib
+      - name: Install Haxelib dependencies
+        if: steps.haxelib-cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-          haxelib setup C:/haxelib
           haxelib install hxcpp 4.2.1 > nul
           haxelib install lime 7.9.0
           haxelib install openfl 9.1.0
@@ -45,6 +56,9 @@ jobs:
           haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
           haxelib install hscript 2.5.0
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+      - name: Pin Haxelib versions
+        shell: cmd
+        run: |
           haxelib set hxcpp 4.2.1
           haxelib set lime 7.9.0
           haxelib set openfl 9.1.0
@@ -54,6 +68,14 @@ jobs:
           haxelib set hscript 2.5.0
           haxelib set hxCodec 2.5.1
           haxelib list
+      - name: Restore hxcpp compile cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HXCPP_COMPILE_CACHE }}
+          key: vyperia-windows-hxcpp-${{ hashFiles('Project.xml') }}-${{ github.sha }}
+          restore-keys: |
+            vyperia-windows-hxcpp-${{ hashFiles('Project.xml') }}-
+            vyperia-windows-hxcpp-
       - name: Create Version Tag
         run: echo "${{ github.run_id }}" > VERSION
       - name: Compile
