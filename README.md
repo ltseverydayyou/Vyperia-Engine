@@ -23,18 +23,108 @@ Vyperia Engine is a performance-focused fork of **OS Engine**, which itself is b
 # Friday Night Funkin' - OS Engine - Modded Psych Engine 
 ![](https://img.shields.io/github/issues/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/forks/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/stars/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/license/notweuz/FNF-OSEngine) ![GitHub all releases](https://img.shields.io/github/downloads/notweuz/FNF-OSEngine/total) ![GitHub repo size](https://img.shields.io/github/repo-size/notweuz/FNF-OSEngine) ![](https://img.shields.io/github/contributors/notweuz/FNF-OSEngine) ![GitHub release (latest by date)](https://img.shields.io/github/downloads/notweuz/FNF-OSEngine/latest/total)
 
-## Installation:
-You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it misses some stuff.
+## Installation and using mods
 
-Follow a Friday Night Funkin' source code compilation tutorial, after this you will need to install LuaJIT.
+There are two different ways to use Vyperia Engine. Pick the one that matches what you downloaded:
 
-To install LuaJIT do this: `haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit` on a Command prompt/PowerShell
+- a finished build, usually a ZIP containing an EXE
+- the engine source code, which is this GitHub repository
 
-...Or if you don't want your mod to be able to run .lua scripts, delete the "LUA_ALLOWED" line on Project.xml
+### If you only want to play a finished mod
 
-If you get an error about StatePointer when using Lua, run `haxelib remove linc_luajit` into Command Prompt/PowerShell, then re-install linc_luajit.
+If a mod creator gave you a ZIP or a folder containing an EXE, the mod is already compiled. You do not need Haxe, LuaJIT, Visual Studio, or the Vyperia source code just to play it.
 
-If you want video support on your mod, simply do `haxelib install hxCodec` on a Command prompt/PowerShell
+1. Download the mod from the creator's official download page.
+2. Extract the entire ZIP. Right-click it, choose **Extract All**, and pick a normal folder such as your Desktop. Do not run the game directly from inside the ZIP.
+3. Open the extracted folder and run the EXE. If there is more than one EXE, use the one mentioned by the mod's own README.
+4. Keep the EXE and its folders together. Folders such as `assets`, `mods`, `songs`, or `data` are often required for the game to start.
+
+If Windows asks for permission or shows a SmartScreen warning, only continue when you trust where the file came from. If the game closes immediately, check the mod's included README first; the build may require a specific engine version or extra files.
+
+A finished mod build should normally be played by itself. Do not copy its EXE into another Psych Engine installation and expect that installation to become Vyperia.
+
+### Using an existing Psych Engine mod with Vyperia
+
+Vyperia is an engine fork, so you run the mod with the Vyperia build. You do not install Vyperia inside a Psych Engine EXE.
+
+This method is for a mod's source/assets, not for a finished EXE-only download:
+
+1. Close the game and make a backup of both the mod and your Vyperia folder.
+2. Open the mod's folder and look at its layout. Depending on the Psych Engine version, it may contain an `assets` folder, a `mods` folder, or folders such as `songs`, `data`, `images`, `characters`, `stages`, `scripts`, `sounds`, `music`, `videos`, and `weeks`.
+3. Copy the mod's files into the matching folders used by Vyperia. If the mod contains an `assets` folder, open both `assets` folders and merge their contents. Do not accidentally create `assets/assets`.
+4. If Windows asks whether to merge folders, allow the merge. Only replace files when they belong to the mod you are installing.
+5. Start the Vyperia build and test the mod. If it loads but a song, character, or stage is missing, the files are usually in the wrong folder or the names do not match the chart exactly.
+
+For example, a mod folder may look like this:
+
+```text
+MyMod/
+├── characters/
+├── data/
+├── images/
+├── music/
+├── scripts/
+├── songs/
+├── sounds/
+├── stages/
+├── videos/
+└── weeks/
+```
+
+Keep the mod's folder structure intact. A file from `songs` should stay in the corresponding `songs` folder, a character file should stay with the character files, and so on.
+
+### Replacing an installed Psych Engine mod
+
+If you already have a Psych Engine mod installed and want to try it with Vyperia:
+
+- Start with a clean copy of Vyperia.
+- Move or merge the mod's content into the matching Vyperia folders as described above.
+- Run the Vyperia EXE, not the old Psych Engine EXE.
+- Do not replace Vyperia's entire `source` folder, `Project.xml`, or `assets` folder with the ones from another engine. Those contain engine files and replacing them can break the build.
+- If the mod includes custom Haxe `.hx` source changes, it is a source-code port rather than a simple file copy. Those changes may need to be added manually before compiling Vyperia.
+
+Some older OS Engine builds use a Polymod layout with `assets/MODS`, a `pack.json`, and a `modList.txt` file. If the build you are using includes that loader, follow the mod's layout and add the mod folder name to `modList.txt`, then restart the game. The mod loader is still a work in progress, so a mod that depends on a different loader or engine version may need to be ported manually.
+
+### Building Vyperia Engine from source
+
+You only need this section if you want to compile the engine yourself or edit its source code.
+
+1. Install [Haxe 4.2.4](https://haxe.org/download/). Other Haxe versions may cause library or build errors.
+2. Download or clone this repository, then open Command Prompt or PowerShell in the repository folder.
+3. Install the LuaJIT library:
+
+```text
+haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
+```
+
+4. Build and run the Windows version:
+
+```text
+haxelib run lime test windows
+```
+
+LuaJIT is needed for mods that use Lua scripts. If you intentionally do not want Lua support, remove the `LUA_ALLOWED` line from `Project.xml`.
+
+For video support, install hxCodec before building:
+
+```text
+haxelib install hxCodec
+```
+
+If you get a `StatePointer` error while using Lua, remove and reinstall LuaJIT:
+
+```text
+haxelib remove linc_luajit
+haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
+```
+
+### Common problems
+
+- **The game cannot find songs, images, or characters:** make sure you extracted the complete mod and merged the inner folders instead of creating an extra folder level.
+- **The mod crashes or closes immediately:** it may require a different Psych Engine/OS Engine version, a missing library, or custom source changes.
+- **Lua errors appear:** reinstall `linc_luajit` and make sure Lua support is enabled in `Project.xml`.
+- **Videos do not play:** install `hxCodec` and rebuild the engine when working from source.
+- **You only received an EXE:** you cannot reliably port that build by copying random files. Look for the mod's source code or use the finished build as provided.
 
 ## OS Engine Credits:
 * [weuz_](https://github.com/notweuz) - Coding
