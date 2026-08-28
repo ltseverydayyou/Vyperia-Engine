@@ -15,7 +15,7 @@ using StringTools;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
-	public static var clientID:String = '1493936679625429255';
+	public static var clientID:String = '1542606850418147348';
 	static var clientIDLoaded:Bool = false;
 	public function new()
 	{
