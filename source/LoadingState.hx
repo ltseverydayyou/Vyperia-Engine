@@ -103,10 +103,16 @@ class LoadingState extends MusicBeatState
 		{
 			@:privateAccess
 			if (!LimeAssets.libraryPaths.exists(library))
-				throw "Missing library: " + library;
+			{
+				trace('Missing asset library: ' + library + ' (continuing without it)');
+				return;
+			}
 
-			var callback = callbacks.add("library:" + library);
-			Assets.loadLibrary(library).onComplete(function (_) { callback(); });
+			var callback = callbacks.add('library:' + library);
+			Assets.loadLibrary(library).onComplete(function (_) { callback(); }).onError(function (_) {
+				trace('Could not load asset library: ' + library + ' (continuing without it)');
+				callback();
+			});
 		}
 	}
 	

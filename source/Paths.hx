@@ -330,67 +330,159 @@ class Paths
 
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-	public static function returnGraphic(key:String, ?library:String) {
-		#if MODS_ALLOWED
-		var modKey:String = modsImages(key);
-		if(FileSystem.exists(modKey)) {
-			if(!currentTrackedAssets.exists(modKey)) {
-				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
-				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(modKey, newGraphic);
-			}
-			localTrackedAssets.push(modKey);
-			return currentTrackedAssets.get(modKey);
-		}
-		#end
+	// Missing optional assets should not terminate the game.
+	static var missingAssetWarnings:Map<String, Bool> = new Map<String, Bool>();
+	static var fallbackGraphic:FlxGraphic;
+	static var fallbackSound:Sound;
 
-		var path = getPath('images/$key.png', IMAGE, library);
-		//trace(path);
-		if (OpenFlAssets.exists(path, IMAGE)) {
-			if(!currentTrackedAssets.exists(path)) {
-				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(path, newGraphic);
-			}
-			localTrackedAssets.push(path);
-			return currentTrackedAssets.get(path);
+	static function warnMissingAsset(kind:String, key:String):Void
+	{
+		var warningKey:String = kind + ':' + key;
+		if(!missingAssetWarnings.exists(warningKey))
+		{
+			missingAssetWarnings.set(warningKey, true);
+			trace('Missing ' + kind + ': ' + key + ' (using a safe fallback)');
 		}
-		trace('oh no its returning null NOOOO');
-		return null;
 	}
 
+	static function getFallbackGraphic(key:String):FlxGraphic
+	{
+		if(fallbackGraphic == null)
+		{
+			var bitmap:BitmapData = new BitmapData(1, 1, true, 0x00000000);
+			fallbackGraphic = FlxGraphic.fromBitmapData(bitmap, false, '__vyperia_missing_asset__');
+			fallbackGraphic.persist = true;
+		}
+		warnMissingAsset('image', key);
+		return fallbackGraphic;
+	}
+
+	static function getFallbackSound(key:String):Sound
+	{
+		if(fallbackSound == null)
+			fallbackSound = new Sound();
+		warnMissingAsset('sound', key);
+		return fallbackSound;
+	}
+	public static function returnGraphic(key:String, ?library:String)
+	{
+		#if MODS_ALLOWED
+		var modKey:String = modsImages(key);
+		if(FileSystem.exists(modKey))
+		{
+			try
+			{
+				if(!currentTrackedAssets.exists(modKey))
+				{
+					var newBitmap:BitmapData = BitmapData.fromFile(modKey);
+					if(newBitmap != null)
+					{
+						var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
+						newGraphic.persist = true;
+						currentTrackedAssets.set(modKey, newGraphic);
+					}
+				}
+				if(currentTrackedAssets.exists(modKey))
+				{
+					localTrackedAssets.push(modKey);
+					return currentTrackedAssets.get(modKey);
+				}
+			}
+			catch(e:Dynamic)
+			{
+				trace('Could not load mod image ' + modKey + ': ' + Std.string(e));
+			}
+		}
+		#end
+
+		var path:String = getPath('images/$key.png', IMAGE, library);
+		try
+		{
+			if(OpenFlAssets.exists(path, IMAGE))
+			{
+				if(!currentTrackedAssets.exists(path))
+				{
+					var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
+					if(newGraphic != null)
+					{
+						newGraphic.persist = true;
+						currentTrackedAssets.set(path, newGraphic);
+					}
+				}
+				if(currentTrackedAssets.exists(path))
+				{
+					localTrackedAssets.push(path);
+					return currentTrackedAssets.get(path);
+				}
+			}
+		}
+		catch(e:Dynamic)
+		{
+			trace('Could not load image ' + path + ': ' + Std.string(e));
+		}
+		return getFallbackGraphic(key);
+	}
 	public static var currentTrackedSounds:Map<String, Sound> = [];
-	public static function returnSound(path:String, key:String, ?library:String) {
+	public static function returnSound(path:String, key:String, ?library:String):Sound
+	{
 		#if MODS_ALLOWED
 		var file:String = modsSounds(path, key);
-		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file)) {
-				currentTrackedSounds.set(file, Sound.fromFile(file));
-			}
-			localTrackedAssets.push(key);
-			return currentTrackedSounds.get(file);
-		}
-		#end
-		// I hate this so god damn much
-		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if(!currentTrackedSounds.exists(gottenPath))
-		#if MODS_ALLOWED
-			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
-		#else
+		if(FileSystem.exists(file))
 		{
-			var folder:String = '';
-			if(path == 'songs') folder = 'songs:';
-
-			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
+			try
+			{
+				if(!currentTrackedSounds.exists(file))
+				{
+					var modSound:Sound = Sound.fromFile(file);
+					if(modSound != null)
+						currentTrackedSounds.set(file, modSound);
+				}
+				if(currentTrackedSounds.exists(file))
+				{
+					localTrackedAssets.push(key);
+					return currentTrackedSounds.get(file);
+				}
+			}
+			catch(e:Dynamic)
+			{
+				trace('Could not load mod sound ' + file + ': ' + Std.string(e));
+			}
 		}
 		#end
+
+		var requestedPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
+		var gottenPath:String = requestedPath;
+		var colonIndex:Int = gottenPath.indexOf(':');
+		if(colonIndex >= 0)
+			gottenPath = gottenPath.substring(colonIndex + 1, gottenPath.length);
+
+		if(!currentTrackedSounds.exists(gottenPath))
+		{
+			var loadedSound:Sound = null;
+			try
+			{
+				#if MODS_ALLOWED
+				if(FileSystem.exists('./' + gottenPath))
+					loadedSound = Sound.fromFile('./' + gottenPath);
+				#else
+				var assetKey:String = path == 'songs' ? 'songs:' + requestedPath : requestedPath;
+				if(OpenFlAssets.exists(assetKey, SOUND))
+					loadedSound = OpenFlAssets.getSound(assetKey);
+				#end
+			}
+			catch(e:Dynamic)
+			{
+				trace('Could not load sound ' + requestedPath + ': ' + Std.string(e));
+			}
+
+			if(loadedSound == null)
+				loadedSound = getFallbackSound(requestedPath);
+			currentTrackedSounds.set(gottenPath, loadedSound);
+		}
+
 		localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
 	}
-
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
 		return 'mods/' + key;

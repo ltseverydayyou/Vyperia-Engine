@@ -42,6 +42,8 @@ typedef SwagSong =
 
 class Song
 {
+	public static var lastLoadFailed:Bool = false;
+	public static var lastLoadError:String = '';
 	public var song:String;
 	public var notes:Array<SwagSection>;
 	public var events:Array<Dynamic>;
@@ -107,53 +109,99 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		var rawJson = null;
-		
-		var formattedFolder:String = Paths.formatToSongPath(folder);
-		var formattedSong:String = Paths.formatToSongPath(jsonInput);
-		#if MODS_ALLOWED
-		var moddyFile:String = Paths.modsJson(formattedFolder + '/' + formattedSong);
-		if(FileSystem.exists(moddyFile)) {
-			rawJson = File.getContent(moddyFile).trim();
-		}
-		#end
+		lastLoadFailed = false;
+		lastLoadError = '';
 
-		if(rawJson == null) {
-			#if sys
-			rawJson = File.getContent(Paths.json(formattedFolder + '/' + formattedSong)).trim();
-			#else
-			rawJson = Assets.getText(Paths.json(formattedFolder + '/' + formattedSong)).trim();
-			#end
-		}
+		var formattedSong:String = Paths.formatToSongPath(jsonInput == null ? '' : jsonInput);
+		var formattedFolder:String = (folder == null || folder.trim().length == 0) ? formattedSong : Paths.formatToSongPath(folder);
 
-		while (!rawJson.endsWith("}"))
+		try
 		{
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		}
+			var rawJson:String = null;
 
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// trace(songData);
-
-		// trace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
+			#if MODS_ALLOWED
+			var moddyFile:String = Paths.modsJson(formattedFolder + '/' + formattedSong);
+			if(FileSystem.exists(moddyFile))
 			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
+				rawJson = File.getContent(moddyFile).trim();
+			}
+			#end
+
+			if(rawJson == null)
+			{
+				#if sys
+				var songPath:String = Paths.json(formattedFolder + '/' + formattedSong);
+				if(FileSystem.exists(songPath))
+				{
+					rawJson = File.getContent(songPath).trim();
+				}
+				else if(folder == null || folder.trim().length == 0)
+				{
+					var directPath:String = Paths.json(formattedSong);
+					if(FileSystem.exists(directPath))
+						rawJson = File.getContent(directPath).trim();
+				}
+				#else
+				var assetPath:String = Paths.json(formattedFolder + '/' + formattedSong);
+				if(Assets.exists(assetPath))
+				{
+					rawJson = Assets.getText(assetPath).trim();
+				}
+				else if(folder == null || folder.trim().length == 0)
+				{
+					var directAssetPath:String = Paths.json(formattedSong);
+					if(Assets.exists(directAssetPath))
+						rawJson = Assets.getText(directAssetPath).trim();
+				}
+				#end
 			}
 
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
+			if(rawJson == null || rawJson.length == 0)
+				throw 'Missing song data for ' + formattedFolder + '/' + formattedSong;
 
-		var songJson:Dynamic = parseJSONshit(rawJson);
-		if(jsonInput != 'events') StageData.loadDirectory(songJson);
-		onLoadJson(songJson);
-		return songJson;
+			var songJson:Dynamic = parseJSONshit(rawJson);
+			if(jsonInput != 'events')
+				StageData.loadDirectory(songJson);
+			onLoadJson(songJson);
+			return songJson;
+		}
+		catch(e:Dynamic)
+		{
+			lastLoadFailed = true;
+			lastLoadError = Std.string(e);
+			StageData.forceNextDirectory = null;
+			trace('Song load failed for ' + formattedFolder + '/' + formattedSong + ': ' + lastLoadError);
+			return createFallbackSong(formattedFolder.length > 0 ? formattedFolder : formattedSong, lastLoadError);
+		}
 	}
 
+	public static function createFallbackSong(songName:String, reason:String):SwagSong
+	{
+		return {
+			song: songName,
+			notes: [],
+			events: [],
+			bpm: 100,
+			needsVoices: false,
+			speed: 1,
+			player1: 'bf',
+			player2: 'dad',
+			gfVersion: 'gf',
+			stage: 'stage',
+			healthdrainKill: false,
+			arrowSkin: null,
+			splashSkin: null,
+			validScore: false,
+			characterTrails: false,
+			bfTrails: false,
+			cameraMoveOnNotes: false,
+			healthdrain: 0,
+			songInstVolume: 0,
+			disableAntiMash: false,
+			disableDebugButtons: false,
+			swapStrumLines: false
+		};
+	}
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;

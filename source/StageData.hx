@@ -88,6 +88,14 @@ class StageData {
 		{
 			return null;
 		}
-		return cast Json.parse(rawJson);
+		try
+		{
+			return cast Json.parse(rawJson);
+		}
+		catch(e:Dynamic)
+		{
+			trace('Could not parse stage data for ' + stage + ': ' + Std.string(e));
+			return null;
+		}
 	}
 }
